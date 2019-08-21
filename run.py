@@ -10,10 +10,11 @@ def increment(start, end, increments, starting_point=0, use_decimals=None):
     increment_number = number_distance
 
     for x in range(increments):
-        new_number_distance = increment_number - number_distance
-        current_number_distance = number_distance + abs(new_number_distance)
-        increment_number = random.randint(0, current_number_distance)
-        numbers.append(start + increment_number)
+        last_number = start if x < 1 else numbers[x - 1]
+        current_number_distance = increment_number - number_distance
+        actual_number_distance = number_distance + abs(current_number_distance)
+        increment_number = random.randint(current_number_distance, actual_number_distance)
+        numbers.append(last_number + increment_number)
 
     return numbers
 
