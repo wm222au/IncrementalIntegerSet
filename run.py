@@ -26,22 +26,38 @@ def increment(start, end, increments, starting_point):
 
     return numbers
 
+
+def generate_output(output, content):
+    if output == "cli":
+        print(tabulate(content, headers=["Id", "Number"]))
+    elif output == "xlsx":
+        create_xlsx_sheet(content)
+    else:
+        print("Only CLI and XLSX is available as output types at the moment")
+
+
+def create_xlsx_sheet(content):
+    print("NotImplementedYet")
+
+
 @cli.log.LoggingApp
-def IncrementalIntegerSet(app):
+def incremental_integer_set(app):
     start = app.params.start
     end = app.params.end
     increments = app.params.increments
-    starting_point = app.params.starting_point
+    starting_point = app.params.startpoint
+    output = app.params.output
 
     numbers = increment(start, end, increments, starting_point)
 
-    print(tabulate(numbers, headers=["Id", "Number"]))
+    generate_output(output, numbers)
 
 
-IncrementalIntegerSet.add_param("start", help="", default=1, type=int)
-IncrementalIntegerSet.add_param("end", help="", default=1, type=int)
-IncrementalIntegerSet.add_param("increments", help="", default=1, type=int)
-IncrementalIntegerSet.add_param("starting_point", help="", default=1, type=int)
+incremental_integer_set.add_param("start", help="", default=1, type=int)
+incremental_integer_set.add_param("end", help="", default=1, type=int)
+incremental_integer_set.add_param("increments", help="", default=1, type=int)
+incremental_integer_set.add_param("-S", "--startpoint", help="", default=1, type=int)
+incremental_integer_set.add_param("-o", "--output", help="", default="cli", type=str)
 
 if __name__ == "__main__":
-    IncrementalIntegerSet.run()
+    incremental_integer_set.run()
