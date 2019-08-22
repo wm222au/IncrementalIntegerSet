@@ -1,6 +1,8 @@
 import math
 import random
 import cli.log
+import xlsxwriter
+import os.path
 from tabulate import tabulate
 
 
@@ -27,17 +29,42 @@ def increment(start, end, increments, starting_point):
     return numbers
 
 
-def generate_output(output, content):
+def generate_output(output, name, content):
     if output == "cli":
         print(tabulate(content, headers=["Id", "Number"]))
     elif output == "xlsx":
-        create_xlsx_sheet(content)
+        create_xlsx_sheet(content, name)
     else:
         print("Only CLI and XLSX is available as output types at the moment")
 
 
-def create_xlsx_sheet(content):
-    print("NotImplementedYet")
+def file_exists(name):
+    return os.path.exists(name)
+
+
+def get_available_file_name(name):
+    fsCount = 1
+    original_name = name
+    name = name + '.xlsx'
+    while file_exists(name):
+        name = original_name + '-' + str(fsCount) + '.xlsx'
+        fsCount += 1
+
+    return name
+
+
+def create_xlsx_sheet(content, name):
+    name = get_available_file_name(name)
+    workbook = xlsxwriter.Workbook(name)
+    worksheet = workbook.add_worksheet()
+
+    row = 0
+
+    for col, data in enumerate(content):
+        worksheet.write_row(row, 0, data)
+        row += 1
+
+    workbook.close()
 
 
 @cli.log.LoggingApp
@@ -47,10 +74,11 @@ def incremental_integer_set(app):
     increments = app.params.increments
     starting_point = app.params.startpoint
     output = app.params.output
+    name = app.params.name
 
     numbers = increment(start, end, increments, starting_point)
 
-    generate_output(output, numbers)
+    generate_output(output, name, numbers)
 
 
 incremental_integer_set.add_param("start", help="", default=1, type=int)
@@ -58,6 +86,7 @@ incremental_integer_set.add_param("end", help="", default=1, type=int)
 incremental_integer_set.add_param("increments", help="", default=1, type=int)
 incremental_integer_set.add_param("-S", "--startpoint", help="", default=1, type=int)
 incremental_integer_set.add_param("-o", "--output", help="", default="cli", type=str)
+incremental_integer_set.add_param("-n", "--name", help="", default="integer_set", type=str)
 
 if __name__ == "__main__":
     incremental_integer_set.run()
