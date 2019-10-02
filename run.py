@@ -14,7 +14,15 @@ def generate_number(range_start, range_end, odds):
 
     return number
 
-def increment(start, end, increments, starting_point):
+
+def simulate(start, end, increments, starting_point, flex):
+    if end < start:
+        return list(reversed(increment(end, start, increments, starting_point, flex)))
+    else:
+        return increment(start, end, increments, starting_point, flex)
+
+
+def increment(start, end, increments, starting_point, flex):
     numbers = []
     pot = end - start
     number_distance = float(pot) / increments  # Get distance between every increment, e.g. in a range of 20 with 10 increments, distance is 2
@@ -75,8 +83,9 @@ def incremental_integer_set(app):
     starting_point = app.params.startpoint
     output = app.params.output
     name = app.params.name
+    flex = True if app.params.fluctuate == 'flex' else None
 
-    numbers = increment(start, end, increments, starting_point)
+    numbers = simulate(start, end, increments, starting_point, flex)
 
     generate_output(output, name, numbers)
 
@@ -84,9 +93,10 @@ def incremental_integer_set(app):
 incremental_integer_set.add_param("start", help="", default=1, type=int)
 incremental_integer_set.add_param("end", help="", default=1, type=int)
 incremental_integer_set.add_param("increments", help="", default=1, type=int)
-incremental_integer_set.add_param("-S", "--startpoint", help="", default=1, type=int)
+incremental_integer_set.add_param("-sp", "--startpoint", help="", default=1, type=int)
 incremental_integer_set.add_param("-o", "--output", help="", default="cli", type=str)
 incremental_integer_set.add_param("-n", "--name", help="", default="integer_set", type=str)
+incremental_integer_set.add_param("-f", "--fluctuate", help="strict (moves strictly from startnumber to endnumber) / flex (can go over and under the startnumber / endnumber)", default="strict", type=str)
 
 if __name__ == "__main__":
     incremental_integer_set.run()
