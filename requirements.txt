@@ -1,3 +1,6 @@
 pyCLI
 XlsxWriter
 tabulate
+tornado
+nose
+pandas

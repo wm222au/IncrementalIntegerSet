@@ -2,6 +2,7 @@ import cli.log
 from increment.increment import simulate
 from xlsx.xlsx_wrapper import generate_output
 
+
 @cli.log.LoggingApp
 def incremental_integer_set(app):
     start = app.params.start

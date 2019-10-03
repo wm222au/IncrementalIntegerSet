@@ -1,3 +1,5 @@
 venv
 /output
 *.xlsx
+.DS_STORE
+.idea
