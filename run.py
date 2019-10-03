@@ -1,79 +1,6 @@
-import math
-import random
 import cli.log
-import xlsxwriter
-import os.path
-from tabulate import tabulate
-
-
-def generate_number(range_start, range_end, odds):
-    number = 0
-    chance = random.uniform(0, 1)
-    if odds >= 1 or odds >= chance:
-        number = random.randint(math.floor(range_start), math.ceil(range_end))
-
-    return number
-
-
-def simulate(start, end, increments, starting_point, flex):
-    if end < start:
-        return list(reversed(increment(end, start, increments, starting_point, flex)))
-    else:
-        return increment(start, end, increments, starting_point, flex)
-
-
-def increment(start, end, increments, starting_point, flex):
-    numbers = []
-    pot = end - start
-    number_distance = float(pot) / increments  # Get distance between every increment, e.g. in a range of 20 with 10 increments, distance is 2
-
-    for x in range(increments):
-        last_number = start if x < 1 else numbers[x - 1][1]
-        increment_number = generate_number(1, number_distance * 2, number_distance)
-        increment_number = pot if increment_number > pot else increment_number
-        numbers.append([x + starting_point, last_number + increment_number])
-        pot = pot - increment_number
-
-    return numbers
-
-
-def generate_output(output, name, content):
-    if output == "cli":
-        print(tabulate(content, headers=["Id", "Number"]))
-    elif output == "xlsx":
-        create_xlsx_sheet(content, name)
-    else:
-        print("Only CLI and XLSX is available as output types at the moment")
-
-
-def file_exists(name):
-    return os.path.exists(name)
-
-
-def get_available_file_name(name):
-    fsCount = 1
-    original_name = name
-    name = name + '.xlsx'
-    while file_exists(name):
-        name = original_name + '-' + str(fsCount) + '.xlsx'
-        fsCount += 1
-
-    return name
-
-
-def create_xlsx_sheet(content, name):
-    name = get_available_file_name(name)
-    workbook = xlsxwriter.Workbook(name)
-    worksheet = workbook.add_worksheet()
-
-    row = 0
-
-    for col, data in enumerate(content):
-        worksheet.write_row(row, 0, data)
-        row += 1
-
-    workbook.close()
-
+from increment.increment import simulate
+from xlsx.xlsx_wrapper import generate_output
 
 @cli.log.LoggingApp
 def incremental_integer_set(app):
@@ -84,10 +11,11 @@ def incremental_integer_set(app):
     output = app.params.output
     name = app.params.name
     flex = True if app.params.fluctuate == 'flex' else None
+    append = app.params.append
 
     numbers = simulate(start, end, increments, starting_point, flex)
 
-    generate_output(output, name, numbers)
+    generate_output(output, name, numbers, append)
 
 
 incremental_integer_set.add_param("start", help="", default=1, type=int)
@@ -97,6 +25,7 @@ incremental_integer_set.add_param("-sp", "--startpoint", help="", default=1, typ
 incremental_integer_set.add_param("-o", "--output", help="", default="cli", type=str)
 incremental_integer_set.add_param("-n", "--name", help="", default="integer_set", type=str)
 incremental_integer_set.add_param("-f", "--fluctuate", help="strict (moves strictly from startnumber to endnumber) / flex (can go over and under the startnumber / endnumber)", default="strict", type=str)
+incremental_integer_set.add_param("-a", "--append", help="set if should append result to existing file", default=None, const=True, nargs="?")
 
 if __name__ == "__main__":
     incremental_integer_set.run()
